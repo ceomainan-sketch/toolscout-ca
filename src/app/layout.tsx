@@ -33,6 +33,15 @@ export default function RootLayout({
         <meta name="impact-site-verification" content="f1148179-e40c-45d3-9afe-380b2716b7e3" />
         <script
           async
+          src="https://www.googletagmanager.com/gtag/js?id=G-YK7C881X9X"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-YK7C881X9X');`,
+          }}
+        />
+        <script
+          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6233733083149670"
           crossOrigin="anonymous"
         />
