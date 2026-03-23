@@ -30,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
       <head>
+        <meta name="impact-site-verification" content="f1148179-e40c-45d3-9afe-380b2716b7e3" />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6233733083149670"
