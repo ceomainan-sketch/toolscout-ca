@@ -2,6 +2,7 @@ import { tools } from "@/data/tools";
 import { comparisons } from "@/data/comparisons";
 import { bestLists } from "@/data/best-lists";
 import { categories } from "@/data/categories";
+import { guides } from "@/data/guides";
 
 export function getTool(slug: string) {
   return tools.find((t) => t.slug === slug);
@@ -37,4 +38,12 @@ export function getAllBestLists() {
 
 export function getAllCategories() {
   return categories;
+}
+
+export function getGuide(slug: string) {
+  return guides.find((g) => g.slug === slug);
+}
+
+export function getAllGuides() {
+  return guides;
 }

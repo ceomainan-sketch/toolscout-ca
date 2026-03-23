@@ -42,6 +42,20 @@ export interface BestList {
   toolSlugs: string[]; // ordered by rank
 }
 
+export interface Guide {
+  slug: string;
+  title: string;
+  metaDescription: string;
+  intro: string;
+  sections: {
+    heading: string;
+    content: string;
+    toolSlug?: string; // optional recommended tool
+  }[];
+  recommendedToolSlugs: string[];
+  relatedComparisons?: string[]; // comparison slugs
+}
+
 export type Category = {
   slug: string;
   name: string;

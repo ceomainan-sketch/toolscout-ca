@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 import { tools } from "@/data/tools";
 import { comparisons } from "@/data/comparisons";
 import { bestLists } from "@/data/best-lists";
+import { guides } from "@/data/guides";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://toolscout.ca";
@@ -27,6 +28,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
+  const guidePages = guides.map((guide) => ({
+    url: `${baseUrl}/guide/${guide.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.9,
+  }));
+
   return [
     {
       url: baseUrl,
@@ -36,6 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...comparisonPages,
     ...bestListPages,
+    ...guidePages,
     ...toolPages,
   ];
 }
