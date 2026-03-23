@@ -49,4 +49,46 @@ export const categories: Category[] = [
     description: "Organize teams and projects with smart tools",
     icon: "📋",
   },
+  {
+    slug: "web-hosting",
+    name: "Web Hosting",
+    description: "Best web hosting providers for speed, uptime, and value",
+    icon: "🌐",
+  },
+  {
+    slug: "vpn",
+    name: "VPN Services",
+    description: "Protect your privacy online with the best VPN providers",
+    icon: "🔒",
+  },
+  {
+    slug: "email-marketing",
+    name: "Email Marketing",
+    description: "Grow your audience with email marketing platforms",
+    icon: "📧",
+  },
+  {
+    slug: "website-builders",
+    name: "Website Builders",
+    description: "Build professional websites without coding",
+    icon: "🏗️",
+  },
+  {
+    slug: "seo-tools",
+    name: "SEO Tools",
+    description: "Rank higher on Google with professional SEO software",
+    icon: "📈",
+  },
+  {
+    slug: "design-tools",
+    name: "Design Tools",
+    description: "Create graphics, presentations, and visual content",
+    icon: "🎨",
+  },
+  {
+    slug: "online-courses",
+    name: "Online Course Platforms",
+    description: "Create and sell courses with the best platforms",
+    icon: "🎓",
+  },
 ];

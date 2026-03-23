@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { getAllCategories } from "@/lib/data";
+
+const navLinks = [
+  { label: "AI Tools", href: "/best/best-ai-writing-tools" },
+  { label: "Web Hosting", href: "/best/best-web-hosting" },
+  { label: "VPNs", href: "/best/best-vpn-services" },
+  { label: "SEO Tools", href: "/best/best-seo-tools" },
+  { label: "Email Marketing", href: "/best/best-email-marketing-platforms" },
+  { label: "Website Builders", href: "/best/best-website-builders" },
+];
 
 export default function Header() {
-  const categories = getAllCategories();
-
   return (
     <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -11,13 +17,13 @@ export default function Header() {
           🔍 ToolScout
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
-          {categories.slice(0, 5).map((cat) => (
+          {navLinks.map((link) => (
             <Link
-              key={cat.slug}
-              href={`/best/${cat.slug === "ai-writing" ? "best-ai-writing-tools" : cat.slug === "ai-image" ? "best-ai-image-generators" : cat.slug === "ai-coding" ? "best-ai-coding-assistants" : cat.slug === "ai-chatbots" ? "best-ai-chatbots" : "best-project-management-tools"}`}
+              key={link.href}
+              href={link.href}
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
-              {cat.name}
+              {link.label}
             </Link>
           ))}
         </nav>
