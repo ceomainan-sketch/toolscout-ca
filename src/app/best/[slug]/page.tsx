@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getBestList, getTool, getAllBestLists } from "@/lib/data";
 import ToolCard from "@/components/ToolCard";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export function generateStaticParams() {
   return getAllBestLists().map((b) => ({ slug: b.slug }));
@@ -19,6 +20,7 @@ export async function generateMetadata({
   return {
     title: list.title + " | ToolScout",
     description: list.metaDescription,
+    alternates: { canonical: `/best/${slug}` },
     openGraph: { title: list.title, description: list.metaDescription },
   };
 }
@@ -54,6 +56,13 @@ export default async function BestListPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Best Lists", href: "/" },
+          { name: list.title, href: `/best/${slug}` },
+        ]}
       />
 
       <nav className="text-sm text-gray-500 mb-6">

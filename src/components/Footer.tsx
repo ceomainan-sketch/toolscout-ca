@@ -1,18 +1,19 @@
 import Link from "next/link";
-import { getAllCategories, getAllComparisons } from "@/lib/data";
+import { getAllCategories, getAllComparisons, getAllGuides } from "@/lib/data";
 
 export default function Footer() {
   const categories = getAllCategories();
   const comparisons = getAllComparisons();
+  const guides = getAllGuides();
 
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-20">
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-gray-900 mb-3">ToolScout</h3>
+            <h3 className="font-bold text-gray-900 mb-3">🔍 ToolScout</h3>
             <p className="text-sm text-gray-600">
-              Honest, detailed comparisons of the best AI and SaaS tools.
+              Honest, detailed comparisons of the best tools for your business.
               Updated for 2026.
             </p>
           </div>
@@ -22,7 +23,7 @@ export default function Footer() {
               {categories.map((cat) => (
                 <li key={cat.slug}>
                   <Link
-                    href={`/best/best-${cat.slug.replace("ai-", "ai-").replace("project-management", "project-management-tools")}-tools`}
+                    href={`/category/${cat.slug}`}
                     className="text-sm text-gray-600 hover:text-gray-900"
                   >
                     {cat.icon} {cat.name}
@@ -36,7 +37,7 @@ export default function Footer() {
               Popular Comparisons
             </h3>
             <ul className="space-y-2">
-              {comparisons.slice(0, 5).map((comp) => (
+              {comparisons.slice(0, 6).map((comp) => (
                 <li key={comp.slug}>
                   <Link
                     href={`/compare/${comp.slug}`}
@@ -45,6 +46,21 @@ export default function Footer() {
                     {comp.slug
                       .replace(/-/g, " ")
                       .replace(/\b\w/g, (l) => l.toUpperCase())}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900 mb-3">Buying Guides</h3>
+            <ul className="space-y-2">
+              {guides.slice(0, 6).map((guide) => (
+                <li key={guide.slug}>
+                  <Link
+                    href={`/guide/${guide.slug}`}
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    {guide.title}
                   </Link>
                 </li>
               ))}

@@ -23,19 +23,31 @@ export default function Home() {
             VPNs, SEO software, and more. Updated for 2026.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((cat) => {
-              const list = bestLists.find((b) => b.category === cat.slug);
-              if (!list) return null;
-              return (
-                <Link
-                  key={cat.slug}
-                  href={`/best/${list.slug}`}
-                  className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-blue-400 hover:text-blue-600 transition-colors"
-                >
-                  {cat.icon} {cat.name}
-                </Link>
-              );
-            })}
+            {categories.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/category/${cat.slug}`}
+                className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-blue-400 hover:text-blue-600 transition-colors"
+              >
+                {cat.icon} {cat.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Trust Badges */}
+          <div className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-500">
+            <span className="flex items-center gap-1.5">
+              <span className="text-green-500">✓</span> {tools.length}+ Tools Compared
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-green-500">✓</span> Updated March 2026
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-green-500">✓</span> Independent Reviews
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-green-500">✓</span> No Sponsored Rankings
+            </span>
           </div>
         </div>
       </section>

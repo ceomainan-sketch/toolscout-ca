@@ -1,8 +1,9 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getTool, getAllComparisons } from "@/lib/data";
+import { getTool, getCategory, getAllComparisons } from "@/lib/data";
 import { tools } from "@/data/tools";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 
 export function generateStaticParams() {
   return tools.map((t) => ({ slug: t.slug }));
@@ -19,6 +20,7 @@ export async function generateMetadata({
   return {
     title: `${tool.name} Review 2026: Pricing, Features, Pros & Cons | ToolScout`,
     description: `Detailed ${tool.name} review for 2026. ${tool.description}. See pricing, features, pros & cons.`,
+    alternates: { canonical: `/tool/${slug}` },
     openGraph: {
       title: `${tool.name} Review 2026`,
       description: tool.description,
@@ -62,11 +64,20 @@ export default async function ToolPage({
     },
   };
 
+  const category = getCategory(tool.category);
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", href: "/" },
+          ...(category ? [{ name: category.name, href: `/category/${category.slug}` }] : []),
+          { name: tool.name, href: `/tool/${slug}` },
+        ]}
       />
 
       <nav className="text-sm text-gray-500 mb-6">
@@ -74,6 +85,14 @@ export default async function ToolPage({
           Home
         </Link>
         <span className="mx-2">›</span>
+        {category && (
+          <>
+            <Link href={`/category/${category.slug}`} className="hover:text-gray-900">
+              {category.name}
+            </Link>
+            <span className="mx-2">›</span>
+          </>
+        )}
         <span className="text-gray-900">{tool.name}</span>
       </nav>
 

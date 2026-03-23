@@ -47,3 +47,24 @@ export function getGuide(slug: string) {
 export function getAllGuides() {
   return guides;
 }
+
+export function getComparisonsByCategory(categorySlug: string) {
+  return comparisons.filter((c) => {
+    const t1 = getTool(c.tool1Slug);
+    const t2 = getTool(c.tool2Slug);
+    return t1?.category === categorySlug || t2?.category === categorySlug;
+  });
+}
+
+export function getGuidesByCategory(categorySlug: string) {
+  return guides.filter((g) => {
+    return g.recommendedToolSlugs.some((slug) => {
+      const tool = getTool(slug);
+      return tool?.category === categorySlug;
+    });
+  });
+}
+
+export function getBestListsByCategory(categorySlug: string) {
+  return bestLists.filter((b) => b.category === categorySlug);
+}

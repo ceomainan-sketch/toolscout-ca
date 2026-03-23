@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getGuide, getTool, getComparison, getAllGuides } from "@/lib/data";
 import ToolCard from "@/components/ToolCard";
+import BreadcrumbSchema from "@/components/BreadcrumbSchema";
+import TableOfContents from "@/components/TableOfContents";
+import { slugify, estimateReadingTime } from "@/lib/utils";
 
 export function generateStaticParams() {
   return getAllGuides().map((g) => ({ slug: g.slug }));
@@ -19,6 +22,7 @@ export async function generateMetadata({
   return {
     title: guide.title + " | ToolScout",
     description: guide.metaDescription,
+    alternates: { canonical: `/guide/${slug}` },
     openGraph: { title: guide.title, description: guide.metaDescription },
   };
 }
@@ -40,6 +44,9 @@ export default async function GuidePage({
     .map((s) => getComparison(s))
     .filter((c) => c !== undefined);
 
+  const allText = guide.intro + " " + guide.sections.map((s) => s.content).join(" ");
+  const readingTime = estimateReadingTime(allText);
+
   const schemaData = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -54,6 +61,13 @@ export default async function GuidePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
       />
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Guides", href: "/" },
+          { name: guide.title, href: `/guide/${slug}` },
+        ]}
+      />
 
       <nav className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-gray-900">
@@ -63,17 +77,24 @@ export default async function GuidePage({
         <span className="text-gray-900">Guide</span>
       </nav>
 
-      <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
         {guide.title}
       </h1>
-      <p className="text-gray-600 mb-2">
-        Last updated:{" "}
-        {new Date().toLocaleDateString("en-US", {
-          month: "long",
-          year: "numeric",
-        })}
-      </p>
-      <p className="text-lg text-gray-600 mb-10">{guide.intro}</p>
+      <div className="flex items-center gap-4 text-gray-500 text-sm mb-2">
+        <span>
+          Last updated:{" "}
+          {new Date().toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+          })}
+        </span>
+        <span>·</span>
+        <span>{readingTime} min read</span>
+      </div>
+      <p className="text-lg text-gray-600 mb-8">{guide.intro}</p>
+
+      {/* Table of Contents */}
+      <TableOfContents sections={guide.sections} />
 
       {/* Quick picks table */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-10">
@@ -110,7 +131,10 @@ export default async function GuidePage({
             : undefined;
           return (
             <div key={i}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              <h2
+                id={slugify(section.heading)}
+                className="text-2xl font-bold text-gray-900 mb-3 scroll-mt-20"
+              >
                 {section.heading}
               </h2>
               <p className="text-gray-700 leading-relaxed mb-4">
@@ -118,7 +142,7 @@ export default async function GuidePage({
               </p>
               {sectionTool && (
                 <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
                       <Link
                         href={`/tool/${sectionTool.slug}`}
@@ -132,10 +156,15 @@ export default async function GuidePage({
                       <span className="text-yellow-600 text-sm ml-2">
                         ★ {sectionTool.rating}/5
                       </span>
+                      {sectionTool.freeTrialDays > 0 && (
+                        <span className="text-green-600 text-xs ml-2 bg-green-50 px-2 py-0.5 rounded-full">
+                          {sectionTool.freeTrialDays}-day free trial
+                        </span>
+                      )}
                     </div>
                     <Link
                       href={`/tool/${sectionTool.slug}`}
-                      className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                      className="text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
                     >
                       Learn More →
                     </Link>

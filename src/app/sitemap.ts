@@ -3,6 +3,7 @@ import { tools } from "@/data/tools";
 import { comparisons } from "@/data/comparisons";
 import { bestLists } from "@/data/best-lists";
 import { guides } from "@/data/guides";
+import { categories } from "@/data/categories";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://toolscout.ca";
@@ -35,6 +36,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
+  const categoryPages = categories.map((cat) => ({
+    url: `${baseUrl}/category/${cat.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
+  }));
+
   return [
     {
       url: baseUrl,
@@ -42,6 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 1,
     },
+    ...categoryPages,
     ...comparisonPages,
     ...bestListPages,
     ...guidePages,
