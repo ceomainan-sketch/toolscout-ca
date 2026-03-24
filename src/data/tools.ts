@@ -484,7 +484,7 @@ export const tools: Tool[] = [
       "Money-back Guarantee": "30 days",
       "CDN": true,
     },
-    affiliateUrl: "",
+    affiliateUrl: "https://bluehost.sjv.io/c/7111837/1376228/11352",
     website: "https://bluehost.com",
     logo: "🌐",
     bestFor: "WordPress beginners and small business websites",
