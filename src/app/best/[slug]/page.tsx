@@ -65,6 +65,11 @@ export default async function BestListPage({
         ]}
       />
 
+      {/* Affiliate Disclosure */}
+      <p className="text-xs text-gray-500 italic mb-4">
+        This page contains affiliate links. We may earn a commission at no extra cost to you.
+      </p>
+
       <nav className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-gray-900">
           Home
@@ -81,8 +86,8 @@ export default async function BestListPage({
       </p>
       <p className="text-lg text-gray-600 mb-10">{list.intro}</p>
 
-      {/* Quick summary table */}
-      <div className="overflow-x-auto mb-10">
+      {/* Quick summary table - Desktop */}
+      <div className="hidden md:block overflow-x-auto mb-10">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="bg-gray-50">
@@ -118,6 +123,32 @@ export default async function BestListPage({
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Quick summary cards - Mobile */}
+      <div className="md:hidden space-y-3 mb-10">
+        {rankedTools.map((tool, i) => (
+          <div
+            key={tool.slug}
+            className="border border-gray-200 rounded-lg p-4 bg-white"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-lg font-bold text-blue-600">#{i + 1}</span>
+              <span className="text-xl">{tool.logo}</span>
+              <Link
+                href={`/tool/${tool.slug}`}
+                className="font-semibold text-gray-900 hover:text-blue-600"
+              >
+                {tool.name}
+              </Link>
+              <span className="ml-auto text-sm text-yellow-600 font-medium">
+                {tool.rating}/5
+              </span>
+            </div>
+            <p className="text-sm text-gray-600 mb-1">{tool.bestFor}</p>
+            <p className="text-sm font-medium text-gray-700">{tool.pricing}</p>
+          </div>
+        ))}
       </div>
 
       {/* Detailed cards */}

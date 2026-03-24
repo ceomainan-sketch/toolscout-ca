@@ -118,6 +118,11 @@ export default async function ComparePage({
         ]}
       />
 
+      {/* Affiliate Disclosure */}
+      <p className="text-xs text-gray-500 italic mb-4">
+        This page contains affiliate links. We may earn a commission at no extra cost to you.
+      </p>
+
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-gray-900">
@@ -159,6 +164,37 @@ export default async function ComparePage({
             {tool2.name} details →
           </Link>
         </div>
+      </div>
+
+      {/* Prominent Affiliate CTA */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+        {[tool1, tool2].map((tool) => (
+          <div
+            key={tool.slug}
+            className="flex flex-col items-center text-center border border-gray-200 rounded-lg p-6 bg-white"
+          >
+            <span className="text-3xl mb-2">{tool.logo}</span>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">{tool.name}</h3>
+            <p className="text-sm text-gray-500 mb-3">{tool.pricing}</p>
+            {tool.affiliateUrl ? (
+              <a
+                href={tool.affiliateUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="w-full inline-block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold text-base transition-colors"
+              >
+                Try {tool.name} Free
+              </a>
+            ) : (
+              <Link
+                href={`/tool/${tool.slug}`}
+                className="w-full inline-block text-center bg-gray-100 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-200 font-semibold text-base"
+              >
+                Learn More
+              </Link>
+            )}
+          </div>
+        ))}
       </div>
 
       {/* Comparison Table */}

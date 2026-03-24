@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="32" fill="#111827"/>
+  <circle cx="88" cy="88" r="38" fill="none" stroke="#3B82F6" stroke-width="10"/>
+  <line x1="116" y1="116" x2="155" y2="155" stroke="#3B82F6" stroke-width="10" stroke-linecap="round"/>
+  <text x="100" y="185" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="bold" fill="white">ToolScout</text>
+</svg>

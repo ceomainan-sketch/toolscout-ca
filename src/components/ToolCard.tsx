@@ -27,7 +27,28 @@ export default function ToolCard({ tool, rank }: { tool: Tool; rank?: number }) 
             <span className="text-gray-500">{tool.rating}/5</span>
             <span className="font-medium text-gray-700">{tool.pricing}</span>
           </div>
-          <div className="flex flex-wrap gap-2 mb-4">
+
+          {/* Prominent affiliate CTA */}
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            {tool.affiliateUrl && (
+              <a
+                href={tool.affiliateUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-semibold text-base transition-colors"
+              >
+                Try {tool.name} Free
+              </a>
+            )}
+            <Link
+              href={`/tool/${tool.slug}`}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Read full review →
+            </Link>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
             {tool.pros.slice(0, 3).map((pro) => (
               <span
                 key={pro}
@@ -36,24 +57,6 @@ export default function ToolCard({ tool, rank }: { tool: Tool; rank?: number }) 
                 ✓ {pro}
               </span>
             ))}
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/tool/${tool.slug}`}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Read full review →
-            </Link>
-            {tool.affiliateUrl && (
-              <a
-                href={tool.affiliateUrl}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="text-sm bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 transition-colors"
-              >
-                Try {tool.name} →
-              </a>
-            )}
           </div>
         </div>
       </div>

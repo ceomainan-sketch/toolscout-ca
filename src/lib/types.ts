@@ -56,6 +56,15 @@ export interface Guide {
   relatedComparisons?: string[]; // comparison slugs
 }
 
+export interface AlternativePage {
+  slug: string;
+  toolSlug: string; // the tool people are looking for alternatives to
+  title: string;
+  metaDescription: string;
+  intro: string; // why people look for alternatives
+  alternativeSlugs: string[]; // tool slugs from tools data, ordered by rank
+}
+
 export type Category = {
   slug: string;
   name: string;

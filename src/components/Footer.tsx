@@ -68,6 +68,26 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-200 text-center text-xs text-gray-500">
+          <div className="flex justify-center gap-4 mb-3">
+            <Link
+              href="/about"
+              className="hover:text-gray-900 transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              href="/privacy"
+              className="hover:text-gray-900 transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="hover:text-gray-900 transition-colors"
+            >
+              Terms of Service
+            </Link>
+          </div>
           <p>
             © {new Date().getFullYear()} ToolScout. Some links on this site are
             affiliate links — we may earn a commission at no extra cost to you.
