@@ -140,7 +140,7 @@ export default async function ComparePage({
         {comparison.title}
       </h1>
       <p className="text-gray-600 mb-2">
-        Last updated: {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        Last updated: March 2026
       </p>
       <p className="text-lg text-gray-600 mb-8">{comparison.metaDescription}</p>
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getTool, getCategory, getAllComparisons } from "@/lib/data";
 import { tools } from "@/data/tools";
 import BreadcrumbSchema from "@/components/BreadcrumbSchema";
+import StickyToolCTA from "@/components/StickyToolCTA";
 
 export function generateStaticParams() {
   return tools.map((t) => ({ slug: t.slug }));
@@ -60,7 +61,6 @@ export default async function ToolPage({
       "@type": "AggregateRating",
       ratingValue: tool.rating,
       bestRating: 5,
-      ratingCount: Math.floor(tool.rating * 100),
     },
   };
 
@@ -266,6 +266,11 @@ export default async function ToolPage({
             ))}
           </div>
         </div>
+      )}
+
+      {/* Sticky mobile CTA bar */}
+      {tool.affiliateUrl && (
+        <StickyToolCTA toolName={tool.name} affiliateUrl={tool.affiliateUrl} />
       )}
     </div>
   );

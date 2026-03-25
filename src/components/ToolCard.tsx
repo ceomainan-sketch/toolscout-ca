@@ -29,23 +29,41 @@ export default function ToolCard({ tool, rank }: { tool: Tool; rank?: number }) 
           </div>
 
           {/* Prominent affiliate CTA */}
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            {tool.affiliateUrl && (
-              <a
-                href={tool.affiliateUrl}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="inline-block bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-semibold text-base transition-colors"
+          <div className="mb-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {tool.affiliateUrl ? (
+                <a
+                  href={tool.affiliateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="inline-flex items-center gap-2 bg-green-600 text-white px-7 py-3 rounded-lg hover:bg-green-700 font-semibold text-base transition-colors"
+                >
+                  Try {tool.name} Free
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              ) : (
+                <a
+                  href={tool.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-gray-500 text-white px-7 py-3 rounded-lg hover:bg-gray-600 font-semibold text-base transition-colors"
+                >
+                  Visit Website
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              )}
+              <Link
+                href={`/tool/${tool.slug}`}
+                className="text-sm text-blue-600 hover:underline"
               >
-                Try {tool.name} Free
-              </a>
+                Read full review &rarr;
+              </Link>
+            </div>
+            {tool.affiliateUrl && (
+              <p className="text-xs text-gray-400 mt-1.5">
+                Free to try. No credit card required.
+              </p>
             )}
-            <Link
-              href={`/tool/${tool.slug}`}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Read full review →
-            </Link>
           </div>
 
           <div className="flex flex-wrap gap-2">

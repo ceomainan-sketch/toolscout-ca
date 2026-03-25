@@ -126,11 +126,7 @@ export default async function AlternativesPage({
         {alt.title}
       </h1>
       <p className="text-gray-600 mb-2">
-        Last updated:{" "}
-        {new Date().toLocaleDateString("en-US", {
-          month: "long",
-          year: "numeric",
-        })}
+        Last updated: March 2026
       </p>
 
       {/* Why look for alternatives */}

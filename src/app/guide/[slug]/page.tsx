@@ -82,11 +82,7 @@ export default async function GuidePage({
       </h1>
       <div className="flex items-center gap-4 text-gray-500 text-sm mb-2">
         <span>
-          Last updated:{" "}
-          {new Date().toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-          })}
+          Last updated: March 2026
         </span>
         <span>·</span>
         <span>{readingTime} min read</span>
