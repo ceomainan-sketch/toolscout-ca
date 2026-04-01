@@ -1,13 +1,16 @@
 import Link from "next/link";
-import { getAllComparisons, getAllBestLists, getAllCategories, getAllGuides, getToolsByCategory, getTool } from "@/lib/data";
+import { getAllComparisons, getAllBestLists, getAllCategories, getAllGuides, getAllAlternatives, getTool } from "@/lib/data";
 import ToolCard from "@/components/ToolCard";
+import StarRating from "@/components/StarRating";
 import { tools } from "@/data/tools";
+import { safeJsonLd, cleanDisplayTitle } from "@/lib/utils";
 
 export default function Home() {
   const categories = getAllCategories();
   const comparisons = getAllComparisons();
   const bestLists = getAllBestLists();
   const guides = getAllGuides();
+  const alternatives = getAllAlternatives();
   const featuredTools = tools.filter((t) => t.rating >= 4.5);
 
   // Top picks by category: get the #1 ranked tool from each major category via best lists
@@ -26,8 +29,39 @@ export default function Home() {
     return { ...cat, tool, bestList: list };
   }).filter((p) => p.tool);
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "ToolScout",
+    url: "https://toolscout.ca",
+    description: "Honest, side-by-side comparisons of the top AI tools, web hosting, VPNs, SEO software, and more.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://toolscout.ca/search?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "ToolScout",
+    url: "https://toolscout.ca",
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(orgSchema) }}
+      />
       {/* Hero */}
       <section className="bg-gradient-to-b from-blue-50 to-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -36,7 +70,7 @@ export default function Home() {
           </h1>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
             Honest, side-by-side comparisons of the top AI tools, web hosting,
-            VPNs, SEO software, and more. Updated for 2026.
+            VPNs, SEO software, and more. Updated for {new Date().getFullYear()}.
           </p>
 
           {/* Hero CTA */}
@@ -86,7 +120,7 @@ export default function Home() {
       </section>
 
       {/* Browse by Category - Full Visual Grid */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
+      <section id="categories" className="max-w-6xl mx-auto px-4 py-16 scroll-mt-20">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Browse by Category
         </h2>
@@ -100,7 +134,7 @@ export default function Home() {
               href={`/category/${cat.slug}`}
               className="border border-gray-200 rounded-lg p-5 hover:shadow-md hover:border-blue-300 transition-all bg-white group text-center"
             >
-              <div className="text-3xl mb-3">{cat.icon}</div>
+              <div className="text-3xl mb-3" role="img" aria-label={cat.name}>{cat.icon}</div>
               <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 text-sm mb-1">
                 {cat.name}
               </h3>
@@ -135,7 +169,7 @@ export default function Home() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mt-3 mb-2">
-                    <span className="text-3xl">{tool.logo}</span>
+                    <span className="text-3xl" role="img" aria-label={`${tool.name} logo`}>{tool.logo}</span>
                     <div>
                       <Link
                         href={`/tool/${tool.slug}`}
@@ -147,11 +181,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm mb-3">
-                    <span className="text-yellow-500">
-                      {"★".repeat(Math.floor(tool.rating))}
-                      {"☆".repeat(5 - Math.floor(tool.rating))}
-                    </span>
-                    <span className="text-gray-500">{tool.rating}/5</span>
+                    <StarRating rating={tool.rating} />
                   </div>
                   <p className="text-sm text-gray-600 mb-4">{tool.description}</p>
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -198,7 +228,7 @@ export default function Home() {
       </section>
 
       {/* Popular Comparisons */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
+      <section id="comparisons" className="max-w-6xl mx-auto px-4 py-16 scroll-mt-20">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Popular Comparisons
         </h2>
@@ -206,14 +236,14 @@ export default function Home() {
           Side-by-side breakdowns of {comparisons.length}+ tool matchups, covering features, pricing, and our honest verdict.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {comparisons.map((comp) => (
+          {comparisons.slice(0, 12).map((comp) => (
             <Link
               key={comp.slug}
               href={`/compare/${comp.slug}`}
               className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white group"
             >
               <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 mb-2">
-                {comp.title.replace(" 2026:", ":")}
+                {cleanDisplayTitle(comp.title)}
               </h3>
               <p className="text-sm text-gray-500 line-clamp-2">
                 {comp.metaDescription}
@@ -224,10 +254,20 @@ export default function Home() {
             </Link>
           ))}
         </div>
+        {comparisons.length > 12 && (
+          <div className="text-center mt-8">
+            <Link
+              href="/search?type=comparison"
+              className="inline-block px-6 py-3 border border-gray-200 rounded-lg text-gray-700 hover:border-blue-300 hover:text-blue-600 transition-colors font-medium"
+            >
+              View all {comparisons.length} comparisons &rarr;
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Best Lists */}
-      <section className="bg-gray-50 py-16 px-4">
+      <section id="best-lists" className="bg-gray-50 py-16 px-4 scroll-mt-20">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Best Tool Rankings
@@ -258,7 +298,7 @@ export default function Home() {
       </section>
 
       {/* Buying Guides */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
+      <section id="guides" className="max-w-6xl mx-auto px-4 py-16 scroll-mt-20">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Buying Guides
         </h2>
@@ -266,7 +306,7 @@ export default function Home() {
           In-depth guides to help you understand what matters before you buy.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {guides.map((guide) => (
+          {guides.slice(0, 12).map((guide) => (
             <Link
               key={guide.slug}
               href={`/guide/${guide.slug}`}
@@ -284,10 +324,61 @@ export default function Home() {
             </Link>
           ))}
         </div>
+        {guides.length > 12 && (
+          <div className="text-center mt-8">
+            <Link
+              href="/search?type=guide"
+              className="inline-block px-6 py-3 border border-gray-200 rounded-lg text-gray-700 hover:border-blue-300 hover:text-blue-600 transition-colors font-medium"
+            >
+              View all {guides.length} buying guides &rarr;
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* Alternatives */}
+      <section id="alternatives" className="bg-gray-50 py-16 px-4 scroll-mt-20">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Tool Alternatives
+          </h2>
+          <p className="text-gray-600 mb-8">
+            Looking to switch? Explore the best alternatives to {alternatives.length}+ popular tools.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {alternatives.slice(0, 12).map((alt) => (
+              <Link
+                key={alt.slug}
+                href={`/alternatives/${alt.slug}`}
+                className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white group"
+              >
+                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 mb-2">
+                  {cleanDisplayTitle(alt.title)}
+                </h3>
+                <p className="text-sm text-gray-500 line-clamp-2">
+                  {alt.metaDescription}
+                </p>
+                <span className="text-sm text-blue-600 mt-3 inline-block">
+                  See alternatives &rarr;
+                </span>
+              </Link>
+            ))}
+          </div>
+          {alternatives.length > 12 && (
+            <div className="text-center mt-8">
+              <Link
+                href="/search?type=alternative"
+                className="inline-block px-6 py-3 border border-gray-200 rounded-lg text-gray-700 hover:border-blue-300 hover:text-blue-600 transition-colors font-medium"
+              >
+                View all {alternatives.length} alternative pages &rarr;
+              </Link>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Top Rated Tools */}
-      <section className="bg-gray-50 py-16 px-4">
+      <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Top Rated Tools
@@ -326,21 +417,27 @@ export default function Home() {
             </ul>
           </div>
 
-          {/* All Comparisons */}
+          {/* Top Comparisons */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-4 text-lg">All Comparisons</h3>
+            <h3 className="font-bold text-gray-900 mb-4 text-lg">Top Comparisons</h3>
             <ul className="space-y-2">
-              {comparisons.map((comp) => (
+              {comparisons.slice(0, 20).map((comp) => (
                 <li key={comp.slug}>
                   <Link
                     href={`/compare/${comp.slug}`}
                     className="text-sm text-blue-600 hover:underline"
                   >
-                    {comp.title.replace(" 2026:", ":")}
+                    {cleanDisplayTitle(comp.title)}
                   </Link>
                 </li>
               ))}
             </ul>
+            <Link
+              href="/search?type=comparison"
+              className="text-sm text-blue-600 hover:underline font-medium mt-3 inline-block"
+            >
+              View all {comparisons.length} comparisons &rarr;
+            </Link>
           </div>
 
           {/* All Categories */}

@@ -1,14 +1,21 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { tools } from "@/data/tools";
+import { comparisons } from "@/data/comparisons";
+import { guides } from "@/data/guides";
 
 export const metadata: Metadata = {
   title: "About ToolScout | How We Review and Compare Tools",
   description:
-    "Learn about ToolScout's mission, methodology, and commitment to honest, independent tool reviews. 100+ tools reviewed across 20+ comparison guides.",
+    "Learn about ToolScout's mission, methodology, and commitment to honest, independent tool reviews. Hands-on testing across AI tools, web hosting, VPNs, SEO, and more.",
   alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {
+  const toolCount = tools.length;
+  const comparisonCount = comparisons.length;
+  const guideCount = guides.length;
+
   return (
     <div>
       {/* Hero */}
@@ -28,9 +35,9 @@ export default function AboutPage() {
         {/* Stats */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { stat: "100+", label: "Tools Reviewed" },
-            { stat: "20+", label: "Comparison Guides" },
-            { stat: "2026", label: "Content Updated" },
+            { stat: `${toolCount}+`, label: "Tools Reviewed" },
+            { stat: `${comparisonCount}+`, label: "Comparisons" },
+            { stat: `${guideCount}+`, label: "Buying Guides" },
             { stat: "0", label: "Sponsored Rankings" },
           ].map((item) => (
             <div
@@ -155,13 +162,13 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              href="/"
+              href="/#comparisons"
               className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
               Browse Comparisons
             </Link>
             <Link
-              href="/guide/best-ai-tools"
+              href="/guide/best-ai-writing-tool-for-bloggers"
               className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors"
             >
               Read Our Guides

@@ -22,10 +22,10 @@ export default function ComparisonTable({
                 Feature
               </th>
               <th className="text-left p-4 border border-gray-200 font-semibold text-gray-900 w-1/3">
-                {tool1.logo} {tool1.name}
+                <span role="img" aria-label={`${tool1.name} logo`}>{tool1.logo}</span> {tool1.name}
               </th>
               <th className="text-left p-4 border border-gray-200 font-semibold text-gray-900 w-1/3">
-                {tool2.logo} {tool2.name}
+                <span role="img" aria-label={`${tool2.name} logo`}>{tool2.logo}</span> {tool2.name}
               </th>
             </tr>
           </thead>
@@ -36,19 +36,25 @@ export default function ComparisonTable({
                   {fc.feature}
                 </td>
                 <td
-                  className={`p-4 border border-gray-200 ${fc.winner === comparison.tool1Slug ? "bg-green-50 font-medium text-green-800" : "text-gray-600"}`}
+                  className={`p-4 border border-gray-200 ${fc.winner === comparison.tool1Slug ? "bg-green-50 font-medium text-green-800" : fc.winner === "tie" ? "bg-yellow-50 text-gray-700" : "text-gray-600"}`}
                 >
                   {fc.tool1Value}
                   {fc.winner === comparison.tool1Slug && (
                     <span className="ml-2 text-green-600">✓</span>
                   )}
+                  {fc.winner === "tie" && (
+                    <span className="ml-2 text-yellow-600">⚖</span>
+                  )}
                 </td>
                 <td
-                  className={`p-4 border border-gray-200 ${fc.winner === comparison.tool2Slug ? "bg-green-50 font-medium text-green-800" : "text-gray-600"}`}
+                  className={`p-4 border border-gray-200 ${fc.winner === comparison.tool2Slug ? "bg-green-50 font-medium text-green-800" : fc.winner === "tie" ? "bg-yellow-50 text-gray-700" : "text-gray-600"}`}
                 >
                   {fc.tool2Value}
                   {fc.winner === comparison.tool2Slug && (
                     <span className="ml-2 text-green-600">✓</span>
+                  )}
+                  {fc.winner === "tie" && (
+                    <span className="ml-2 text-yellow-600">⚖</span>
                   )}
                 </td>
               </tr>
@@ -80,7 +86,7 @@ export default function ComparisonTable({
                   className={`flex items-start justify-between p-2 rounded ${fc.winner === comparison.tool1Slug ? "bg-green-50" : "bg-gray-50"}`}
                 >
                   <span className="font-medium text-gray-800 text-sm">
-                    {tool1.logo} {tool1.name}
+                    <span role="img" aria-label={`${tool1.name} logo`}>{tool1.logo}</span> {tool1.name}
                   </span>
                   <span
                     className={`text-sm text-right ml-2 ${fc.winner === comparison.tool1Slug ? "text-green-800 font-medium" : "text-gray-600"}`}
@@ -95,7 +101,7 @@ export default function ComparisonTable({
                   className={`flex items-start justify-between p-2 rounded ${fc.winner === comparison.tool2Slug ? "bg-green-50" : "bg-gray-50"}`}
                 >
                   <span className="font-medium text-gray-800 text-sm">
-                    {tool2.logo} {tool2.name}
+                    <span role="img" aria-label={`${tool2.name} logo`}>{tool2.logo}</span> {tool2.name}
                   </span>
                   <span
                     className={`text-sm text-right ml-2 ${fc.winner === comparison.tool2Slug ? "text-green-800 font-medium" : "text-gray-600"}`}
@@ -107,11 +113,15 @@ export default function ComparisonTable({
                   </span>
                 </div>
               </div>
-              {winnerTool && (
+              {winnerTool ? (
                 <p className="mt-2 text-xs text-green-700 font-medium">
                   Winner: {winnerTool.name}
                 </p>
-              )}
+              ) : fc.winner === "tie" ? (
+                <p className="mt-2 text-xs text-yellow-700 font-medium">
+                  Tie
+                </p>
+              ) : null}
             </div>
           );
         })}

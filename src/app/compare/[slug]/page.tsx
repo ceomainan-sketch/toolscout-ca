@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getComparison, getTool, getAllComparisons } from "@/lib/data";
+import { getComparison, getTool, getAllComparisons, getComparisonsByCategory, getAlternative } from "@/lib/data";
 import ComparisonTable from "@/components/ComparisonTable";
 import BreadcrumbSchema from "@/components/BreadcrumbSchema";
+import { currentMonth, safeJsonLd, cleanDisplayTitle, schemaDate } from "@/lib/utils";
 
 export function generateStaticParams() {
   return getAllComparisons().map((c) => ({ slug: c.slug }));
@@ -24,6 +25,7 @@ export async function generateMetadata({
     openGraph: {
       title: comparison.title,
       description: comparison.metaDescription,
+      images: [{ url: "/logo.png", width: 512, height: 512, alt: "ToolScout" }],
     },
   };
 }
@@ -41,7 +43,8 @@ export default async function ComparePage({
   const tool2 = getTool(comparison.tool2Slug);
   if (!tool1 || !tool2) notFound();
 
-  const winner = comparison.verdictWinner === tool1.slug ? tool1 : tool2;
+  const isTie = comparison.verdictWinner !== tool1.slug && comparison.verdictWinner !== tool2.slug;
+  const winner = comparison.verdictWinner === tool1.slug ? tool1 : comparison.verdictWinner === tool2.slug ? tool2 : null;
 
   // Find pricing comparison
   const pricingRow = comparison.featureComparisons.find(
@@ -49,13 +52,17 @@ export default async function ComparePage({
   );
 
   // Schema.org Article
+  const dates = schemaDate(slug);
   const schemaData = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: comparison.title,
     description: comparison.metaDescription,
-    dateModified: new Date().toISOString().split("T")[0],
+    datePublished: dates.published,
+    dateModified: dates.modified,
     author: { "@type": "Organization", name: "ToolScout" },
+    publisher: { "@type": "Organization", name: "ToolScout", url: "https://toolscout.ca" },
+    url: `https://toolscout.ca/compare/${slug}`,
   };
 
   // FAQ Schema for rich snippets
@@ -86,7 +93,7 @@ export default async function ComparePage({
         name: `What is ${tool1.name} best for?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${tool1.name} is best for ${tool1.bestFor.toLowerCase()}.`,
+          text: `${tool1.name} is best for ${(tool1.bestFor ?? "").toLowerCase()}.`,
         },
       },
       {
@@ -94,7 +101,7 @@ export default async function ComparePage({
         name: `What is ${tool2.name} best for?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `${tool2.name} is best for ${tool2.bestFor.toLowerCase()}.`,
+          text: `${tool2.name} is best for ${(tool2.bestFor ?? "").toLowerCase()}.`,
         },
       },
     ],
@@ -104,16 +111,16 @@ export default async function ComparePage({
     <div className="max-w-4xl mx-auto px-4 py-12">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(schemaData) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
       />
       <BreadcrumbSchema
         items={[
           { name: "Home", href: "/" },
-          { name: "Comparisons", href: "/" },
+          { name: "Comparisons", href: "/#comparisons" },
           { name: `${tool1.name} vs ${tool2.name}`, href: `/compare/${slug}` },
         ]}
       />
@@ -124,12 +131,12 @@ export default async function ComparePage({
       </p>
 
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500 mb-6">
+      <nav aria-label="Breadcrumb" className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-gray-900">
           Home
         </Link>
         <span className="mx-2">›</span>
-        <span>Comparisons</span>
+        <Link href="/#comparisons" className="hover:text-gray-900">Comparisons</Link>
         <span className="mx-2">›</span>
         <span className="text-gray-900">
           {tool1.name} vs {tool2.name}
@@ -140,14 +147,14 @@ export default async function ComparePage({
         {comparison.title}
       </h1>
       <p className="text-gray-600 mb-2">
-        Last updated: March 2026
+        Last updated: {currentMonth()}
       </p>
       <p className="text-lg text-gray-600 mb-8">{comparison.metaDescription}</p>
 
       {/* Quick Verdict */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-10">
         <h2 className="text-lg font-bold text-gray-900 mb-2">
-          Quick Verdict: {winner.name} wins overall
+          Quick Verdict: {isTie || !winner ? "It's a close call" : `${winner.name} wins overall`}
         </h2>
         <p className="text-gray-700">{comparison.verdict}</p>
         <div className="flex gap-4 mt-4">
@@ -173,7 +180,7 @@ export default async function ComparePage({
             key={tool.slug}
             className="flex flex-col items-center text-center border border-gray-200 rounded-lg p-6 bg-white"
           >
-            <span className="text-3xl mb-2">{tool.logo}</span>
+            <span className="text-3xl mb-2" role="img" aria-label={`${tool.name} logo`}>{tool.logo}</span>
             <h3 className="text-lg font-bold text-gray-900 mb-1">{tool.name}</h3>
             <p className="text-sm text-gray-500 mb-3">{tool.pricing}</p>
             {tool.affiliateUrl ? (
@@ -183,7 +190,7 @@ export default async function ComparePage({
                 rel="noopener noreferrer nofollow"
                 className="w-full inline-block text-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold text-base transition-colors"
               >
-                Try {tool.name} Free
+                {tool.freeTrialDays > 0 || tool.pricing.toLowerCase().includes("free") ? `Try ${tool.name} Free` : `Visit ${tool.name}`}
               </a>
             ) : (
               <Link
@@ -208,7 +215,7 @@ export default async function ComparePage({
         {[tool1, tool2].map((tool) => (
           <div key={tool.slug}>
             <h3 className="text-xl font-bold text-gray-900 mb-4">
-              {tool.logo} {tool.name}
+              <span role="img" aria-label={`${tool.name} logo`}>{tool.logo}</span> {tool.name}
             </h3>
             <div className="mb-4">
               <h4 className="font-semibold text-green-700 mb-2">Pros</h4>
@@ -243,7 +250,7 @@ export default async function ComparePage({
               ) : (
                 <Link
                   href={`/tool/${tool.slug}`}
-                  className="inline-block bg-gray-100 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-200 text-sm"
+                  className="inline-block bg-gray-100 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-200 text-sm transition-colors"
                 >
                   Learn more →
                 </Link>
@@ -278,7 +285,7 @@ export default async function ComparePage({
               What is {tool1.name} best for?
             </h3>
             <p className="text-gray-600 text-sm">
-              {tool1.name} is best for {tool1.bestFor.toLowerCase()}.
+              {tool1.name} is best for {(tool1.bestFor ?? "").toLowerCase()}.
             </p>
           </div>
           <div>
@@ -286,7 +293,7 @@ export default async function ComparePage({
               What is {tool2.name} best for?
             </h3>
             <p className="text-gray-600 text-sm">
-              {tool2.name} is best for {tool2.bestFor.toLowerCase()}.
+              {tool2.name} is best for {(tool2.bestFor ?? "").toLowerCase()}.
             </p>
           </div>
         </div>
@@ -299,6 +306,64 @@ export default async function ComparePage({
         </h2>
         <p className="text-gray-700">{comparison.verdict}</p>
       </div>
+
+      {/* Related Comparisons */}
+      {(() => {
+        const relatedComps = getComparisonsByCategory(tool1.category)
+          .filter((c) => c.slug !== comparison.slug)
+          .slice(0, 6);
+        if (relatedComps.length === 0) return null;
+        return (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Related Comparisons
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {relatedComps.map((comp) => (
+                <Link
+                  key={comp.slug}
+                  href={`/compare/${comp.slug}`}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all bg-white group"
+                >
+                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 text-sm">
+                    {cleanDisplayTitle(comp.title)}
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                    {comp.metaDescription}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Alternatives Links */}
+      {(() => {
+        const alt1 = getAlternative(`${tool1.slug}-alternatives`);
+        const alt2 = getAlternative(`${tool2.slug}-alternatives`);
+        if (!alt1 && !alt2) return null;
+        return (
+          <div className="mt-10 flex flex-wrap gap-3">
+            {alt1 && (
+              <Link
+                href={`/alternatives/${alt1.slug}`}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {tool1.name} Alternatives &rarr;
+              </Link>
+            )}
+            {alt2 && (
+              <Link
+                href={`/alternatives/${alt2.slug}`}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {tool2.name} Alternatives &rarr;
+              </Link>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

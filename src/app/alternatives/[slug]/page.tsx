@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAlternative, getTool, getAllAlternatives } from "@/lib/data";
+import { getAlternative, getTool, getAllAlternatives, getAllComparisons } from "@/lib/data";
 import ToolCard from "@/components/ToolCard";
 import BreadcrumbSchema from "@/components/BreadcrumbSchema";
+import { currentMonth, safeJsonLd, cleanDisplayTitle } from "@/lib/utils";
 
 export function generateStaticParams() {
   return getAllAlternatives().map((a) => ({ slug: a.slug }));
@@ -21,7 +22,7 @@ export async function generateMetadata({
     title: alt.title + " | ToolScout",
     description: alt.metaDescription,
     alternates: { canonical: `/alternatives/${slug}` },
-    openGraph: { title: alt.title, description: alt.metaDescription },
+    openGraph: { title: alt.title, description: alt.metaDescription, images: [{ url: "/logo.png", width: 512, height: 512, alt: "ToolScout" }] },
   };
 }
 
@@ -60,7 +61,7 @@ export default async function AlternativesPage({
     {
       question: `What is the best alternative to ${mainToolName}?`,
       answer: alternativeTools.length > 0
-        ? `${alternativeTools[0].name} is our top-rated alternative to ${mainToolName}. It scores ${alternativeTools[0].rating}/5 in our testing and is best for ${alternativeTools[0].bestFor.toLowerCase()}.`
+        ? `${alternativeTools[0].name} is our top-rated alternative to ${mainToolName}. It scores ${alternativeTools[0].rating}/5 in our testing and is best for ${(alternativeTools[0].bestFor ?? "a wide range of use cases").toLowerCase()}.`
         : `Check out our ranked list above for the best alternatives.`,
     },
     {
@@ -100,33 +101,38 @@ export default async function AlternativesPage({
     <div className="max-w-4xl mx-auto px-4 py-12">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(itemListSchema) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
       />
       <BreadcrumbSchema
         items={[
           { name: "Home", href: "/" },
-          { name: "Alternatives", href: "/" },
+          { name: "Alternatives", href: "/#alternatives" },
           { name: alt.title, href: `/alternatives/${slug}` },
         ]}
       />
 
-      <nav className="text-sm text-gray-500 mb-6">
+      {/* Affiliate Disclosure */}
+      <p className="text-xs text-gray-500 italic mb-4">
+        This page contains affiliate links. We may earn a commission at no extra cost to you.
+      </p>
+
+      <nav aria-label="Breadcrumb" className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-gray-900">
           Home
         </Link>
-        <span className="mx-2">&rsaquo;</span>
-        <span className="text-gray-900">Alternatives</span>
+        <span className="mx-2">›</span>
+        <Link href="/#alternatives" className="hover:text-gray-900">Alternatives</Link>
       </nav>
 
       <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
         {alt.title}
       </h1>
       <p className="text-gray-600 mb-2">
-        Last updated: March 2026
+        Last updated: {currentMonth()}
       </p>
 
       {/* Why look for alternatives */}
@@ -137,8 +143,8 @@ export default async function AlternativesPage({
         <p className="text-lg text-gray-600">{alt.intro}</p>
       </section>
 
-      {/* Quick comparison table */}
-      <div className="overflow-x-auto mb-10">
+      {/* Quick comparison table - Desktop */}
+      <div className="hidden md:block overflow-x-auto mb-10">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="bg-gray-50">
@@ -178,6 +184,27 @@ export default async function AlternativesPage({
         </table>
       </div>
 
+      {/* Quick comparison - Mobile stacked cards */}
+      <div className="md:hidden space-y-3 mb-10">
+        {alternativeTools.map((tool, i) => (
+          <Link
+            key={tool.slug}
+            href={`/tool/${tool.slug}`}
+            className="block border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-bold text-blue-600">#{i + 1}</span>
+              <span className="text-sm text-yellow-600 font-medium">{tool.rating}/5</span>
+            </div>
+            <div className="font-semibold text-gray-900 mb-1">
+              {tool.logo} {tool.name}
+            </div>
+            <p className="text-sm text-gray-600 mb-1">{tool.bestFor}</p>
+            <p className="text-sm text-gray-500">{tool.pricing}</p>
+          </Link>
+        ))}
+      </div>
+
       {/* Detailed alternative cards */}
       <section className="mb-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -201,6 +228,35 @@ export default async function AlternativesPage({
           ))}
         </div>
       </section>
+
+      {/* Related Comparisons */}
+      {(() => {
+        const allToolSlugs = new Set([alt.toolSlug, ...alt.alternativeSlugs]);
+        const relatedComps = getAllComparisons()
+          .filter((c) => allToolSlugs.has(c.tool1Slug) || allToolSlugs.has(c.tool2Slug))
+          .slice(0, 6);
+        if (relatedComps.length === 0) return null;
+        return (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Head-to-Head Comparisons
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {relatedComps.map((comp) => (
+                <Link
+                  key={comp.slug}
+                  href={`/compare/${comp.slug}`}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all bg-white group"
+                >
+                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 text-sm">
+                    {cleanDisplayTitle(comp.title)}
+                  </h3>
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* FAQ Section */}
       <section className="mb-12">

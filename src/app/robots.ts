@@ -16,6 +16,22 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "CCBot",
         disallow: ["/"],
       },
+      {
+        userAgent: "Google-Extended",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "anthropic-ai",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "ClaudeBot",
+        disallow: ["/"],
+      },
+      {
+        userAgent: "Bytespider",
+        disallow: ["/"],
+      },
     ],
     sitemap: "https://toolscout.ca/sitemap.xml",
   };

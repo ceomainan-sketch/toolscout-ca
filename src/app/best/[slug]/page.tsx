@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getBestList, getTool, getAllBestLists, getCategory } from "@/lib/data";
+import { getBestList, getTool, getAllBestLists, getCategory, getComparisonsByCategory, getGuidesByCategory } from "@/lib/data";
 import ToolCard from "@/components/ToolCard";
 import BreadcrumbSchema from "@/components/BreadcrumbSchema";
+import { currentMonth, yearStr, safeJsonLd, cleanDisplayTitle } from "@/lib/utils";
 
 export function generateStaticParams() {
   return getAllBestLists().map((b) => ({ slug: b.slug }));
@@ -21,7 +22,7 @@ export async function generateMetadata({
     title: list.title + " | ToolScout",
     description: list.metaDescription,
     alternates: { canonical: `/best/${slug}` },
-    openGraph: { title: list.title, description: list.metaDescription },
+    openGraph: { title: list.title, description: list.metaDescription, images: [{ url: "/logo.png", width: 512, height: 512, alt: "ToolScout" }] },
   };
 }
 
@@ -40,6 +41,8 @@ export default async function BestListPage({
 
   const category = getCategory(list.category);
   const categoryName = category?.name ?? list.category.replace(/-/g, " ");
+  const relatedComparisons = getComparisonsByCategory(list.category).slice(0, 6);
+  const relatedGuides = getGuidesByCategory(list.category).slice(0, 3);
   const topToolName = rankedTools[0]?.name ?? "our top pick";
   const freeTools = rankedTools.filter(
     (t) => t.pricing.toLowerCase().includes("free") || t.pricingAmount === 0
@@ -47,8 +50,8 @@ export default async function BestListPage({
 
   const faqItems = [
     {
-      question: `What is the best ${categoryName} tool in 2026?`,
-      answer: `Based on our testing, ${topToolName} is the best ${categoryName} tool in 2026. It earned the top spot for its overall feature set, ease of use, and value for money. See our full ranking above for details on every tool we evaluated.`,
+      question: `What is the best ${categoryName} tool in ${yearStr()}?`,
+      answer: `Based on our testing, ${topToolName} is the best ${categoryName} tool in ${yearStr()}. It earned the top spot for its overall feature set, ease of use, and value for money. See our full ranking above for details on every tool we evaluated.`,
     },
     {
       question: `Are there free ${categoryName} tools available?`,
@@ -96,16 +99,16 @@ export default async function BestListPage({
     <div className="max-w-4xl mx-auto px-4 py-12">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(schemaData) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchemaData) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchemaData) }}
       />
       <BreadcrumbSchema
         items={[
           { name: "Home", href: "/" },
-          { name: "Best Lists", href: "/" },
+          { name: "Best Lists", href: "/#best-lists" },
           { name: list.title, href: `/best/${slug}` },
         ]}
       />
@@ -115,19 +118,19 @@ export default async function BestListPage({
         This page contains affiliate links. We may earn a commission at no extra cost to you.
       </p>
 
-      <nav className="text-sm text-gray-500 mb-6">
+      <nav aria-label="Breadcrumb" className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-gray-900">
           Home
         </Link>
         <span className="mx-2">›</span>
-        <span className="text-gray-900">Best Lists</span>
+        <Link href="/#best-lists" className="hover:text-gray-900">Best Lists</Link>
       </nav>
 
       <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
         {list.title}
       </h1>
       <p className="text-gray-600 mb-2">
-        Last updated: March 2026
+        Last updated: {currentMonth()}
       </p>
       <p className="text-lg text-gray-600 mb-10">{list.intro}</p>
 
@@ -179,7 +182,7 @@ export default async function BestListPage({
           >
             <div className="flex items-center gap-3 mb-2">
               <span className="text-lg font-bold text-blue-600">#{i + 1}</span>
-              <span className="text-xl">{tool.logo}</span>
+              <span className="text-xl" role="img" aria-label={`${tool.name} logo`}>{tool.logo}</span>
               <Link
                 href={`/tool/${tool.slug}`}
                 className="font-semibold text-gray-900 hover:text-blue-600"
@@ -202,6 +205,56 @@ export default async function BestListPage({
           <ToolCard key={tool.slug} tool={tool} rank={i + 1} />
         ))}
       </div>
+
+      {/* Related Comparisons */}
+      {relatedComparisons.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Head-to-Head Comparisons
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {relatedComparisons.map((comp) => (
+              <Link
+                key={comp.slug}
+                href={`/compare/${comp.slug}`}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all bg-white group"
+              >
+                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 text-sm">
+                  {cleanDisplayTitle(comp.title)}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                  {comp.metaDescription}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Related Guides */}
+      {relatedGuides.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Related Buying Guides
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {relatedGuides.map((guide) => (
+              <Link
+                key={guide.slug}
+                href={`/guide/${guide.slug}`}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all bg-white group"
+              >
+                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 text-sm">
+                  {guide.title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                  {guide.metaDescription}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* FAQ Section */}
       <div className="mt-16">

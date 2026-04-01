@@ -65,7 +65,7 @@ export default function PrivacyPage() {
           </p>
 
           <h3 className="text-lg font-semibold text-gray-900 mt-4 mb-2">
-            Google Analytics (G-YK7C881X9X)
+            Google Analytics
           </h3>
           <p className="text-gray-600 mb-3">
             We use Google Analytics to understand how visitors interact with our

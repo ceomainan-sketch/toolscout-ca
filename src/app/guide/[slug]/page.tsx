@@ -5,7 +5,7 @@ import { getGuide, getTool, getComparison, getAllGuides } from "@/lib/data";
 import ToolCard from "@/components/ToolCard";
 import BreadcrumbSchema from "@/components/BreadcrumbSchema";
 import TableOfContents from "@/components/TableOfContents";
-import { slugify, estimateReadingTime } from "@/lib/utils";
+import { slugify, estimateReadingTime, currentMonth, safeJsonLd, schemaDate } from "@/lib/utils";
 
 export function generateStaticParams() {
   return getAllGuides().map((g) => ({ slug: g.slug }));
@@ -23,7 +23,7 @@ export async function generateMetadata({
     title: guide.title + " | ToolScout",
     description: guide.metaDescription,
     alternates: { canonical: `/guide/${slug}` },
-    openGraph: { title: guide.title, description: guide.metaDescription },
+    openGraph: { title: guide.title, description: guide.metaDescription, images: [{ url: "/logo.png", width: 512, height: 512, alt: "ToolScout" }] },
   };
 }
 
@@ -47,34 +47,85 @@ export default async function GuidePage({
   const allText = guide.intro + " " + guide.sections.map((s) => s.content).join(" ");
   const readingTime = estimateReadingTime(allText);
 
+  const dates = schemaDate(slug);
   const schemaData = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: guide.title,
     description: guide.metaDescription,
-    dateModified: new Date().toISOString(),
+    datePublished: dates.published,
+    dateModified: dates.modified,
+    author: { "@type": "Organization", name: "ToolScout" },
+    publisher: { "@type": "Organization", name: "ToolScout", url: "https://toolscout.ca" },
+    url: `https://toolscout.ca/guide/${slug}`,
+  };
+
+  const topTool = recommendedTools[0];
+  const faqItems = [
+    ...(topTool
+      ? [
+          {
+            question: `What is the best tool recommended in this guide?`,
+            answer: `Based on our testing, ${topTool.name} is our top pick. It scores ${topTool.rating}/5 and is best for ${(topTool.bestFor ?? "").toLowerCase()}. ${topTool.pricing}.`,
+          },
+        ]
+      : []),
+    {
+      question: guide.sections[0]?.heading ?? `What does this guide cover?`,
+      answer: guide.sections[0]?.content ?? guide.intro,
+    },
+    ...(recommendedTools.length > 1
+      ? [
+          {
+            question: `What are the top tools compared in this guide?`,
+            answer: `We compare ${recommendedTools.map((t) => t.name).join(", ")}. Each tool is ranked based on features, pricing, ease of use, and value for money.`,
+          },
+        ]
+      : []),
+  ];
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
   };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(schemaData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
       />
       <BreadcrumbSchema
         items={[
           { name: "Home", href: "/" },
-          { name: "Guides", href: "/" },
+          { name: "Guides", href: "/#guides" },
           { name: guide.title, href: `/guide/${slug}` },
         ]}
       />
 
-      <nav className="text-sm text-gray-500 mb-6">
+      {/* Affiliate Disclosure */}
+      <p className="text-xs text-gray-500 italic mb-4">
+        This page contains affiliate links. We may earn a commission at no extra cost to you.
+      </p>
+
+      <nav aria-label="Breadcrumb" className="text-sm text-gray-500 mb-6">
         <Link href="/" className="hover:text-gray-900">
           Home
         </Link>
         <span className="mx-2">›</span>
-        <span className="text-gray-900">Guide</span>
+        <Link href="/#guides" className="hover:text-gray-900">Guides</Link>
       </nav>
 
       <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
@@ -82,7 +133,7 @@ export default async function GuidePage({
       </h1>
       <div className="flex items-center gap-4 text-gray-500 text-sm mb-2">
         <span>
-          Last updated: March 2026
+          Last updated: {currentMonth()}
         </span>
         <span>·</span>
         <span>{readingTime} min read</span>
@@ -95,7 +146,7 @@ export default async function GuidePage({
       {/* Quick picks table */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-10">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          ⚡ Quick Answer
+          <span aria-hidden="true">⚡</span> Quick Answer
         </h2>
         <div className="space-y-3">
           {recommendedTools.slice(0, 3).map((tool, i) => (
@@ -158,12 +209,23 @@ export default async function GuidePage({
                         </span>
                       )}
                     </div>
-                    <Link
-                      href={`/tool/${sectionTool.slug}`}
-                      className="text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
-                    >
-                      Learn More →
-                    </Link>
+                    {sectionTool.affiliateUrl ? (
+                      <a
+                        href={sectionTool.affiliateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        className="text-sm bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all"
+                      >
+                        Try {sectionTool.name} →
+                      </a>
+                    ) : (
+                      <Link
+                        href={`/tool/${sectionTool.slug}`}
+                        className="text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
+                      >
+                        Learn More →
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
@@ -181,6 +243,25 @@ export default async function GuidePage({
           <ToolCard key={tool.slug} tool={tool} rank={i + 1} />
         ))}
       </div>
+
+      {/* FAQ Section */}
+      {faqItems.length > 0 && (
+        <div className="border-t border-gray-200 pt-8 mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-6">
+            {faqItems.map((item) => (
+              <div key={item.question}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {item.question}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Related comparisons */}
       {relatedComparisons.length > 0 && (

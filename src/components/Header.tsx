@@ -9,7 +9,9 @@ const navLinks = [
   { label: "VPNs", href: "/best/best-vpn-services" },
   { label: "SEO Tools", href: "/best/best-seo-tools" },
   { label: "Email Marketing", href: "/best/best-email-marketing-platforms" },
-  { label: "Website Builders", href: "/best/best-website-builders" },
+  { label: "CRM", href: "/best/best-crm-software" },
+  { label: "All Categories", href: "/#categories" },
+  { label: "Search", href: "/search" },
 ];
 
 export default function Header() {
@@ -40,6 +42,7 @@ export default function Header() {
           className="md:hidden p-2 text-gray-600 hover:text-gray-900"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           <svg
             className="w-6 h-6"
@@ -70,13 +73,15 @@ export default function Header() {
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
+        aria-hidden={!menuOpen}
       >
-        <nav className="flex flex-col px-4 pb-4 text-sm border-t border-gray-100">
+        <nav aria-label="Mobile navigation" className="flex flex-col px-4 pb-4 text-sm border-t border-gray-100">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
+              tabIndex={menuOpen ? 0 : -1}
               className="py-3 text-gray-600 hover:text-gray-900 transition-colors border-b border-gray-50 last:border-b-0"
             >
               {link.label}

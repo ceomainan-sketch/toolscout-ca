@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllCategories, getAllComparisons, getAllGuides } from "@/lib/data";
+import { cleanDisplayTitle } from "@/lib/utils";
 import NewsletterSignup from "@/components/NewsletterSignup";
 
 export default function Footer() {
@@ -9,18 +10,16 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-20">
-      <div className="max-w-6xl mx-auto px-4 pt-12 pb-4">
+      <div className="max-w-6xl mx-auto px-4 pt-12 pb-12">
         <div className="mb-12">
           <NewsletterSignup />
         </div>
-      </div>
-      <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-gray-900 mb-3">🔍 ToolScout</h3>
+            <h3 className="font-bold text-gray-900 mb-3"><span aria-hidden="true">🔍</span> ToolScout</h3>
             <p className="text-sm text-gray-600">
               Honest, detailed comparisons of the best tools for your business.
-              Updated for 2026.
+              Updated for {new Date().getFullYear()}.
             </p>
           </div>
           <div>
@@ -49,9 +48,7 @@ export default function Footer() {
                     href={`/compare/${comp.slug}`}
                     className="text-sm text-gray-600 hover:text-gray-900"
                   >
-                    {comp.slug
-                      .replace(/-/g, " ")
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    {cleanDisplayTitle(comp.title)}
                   </Link>
                 </li>
               ))}

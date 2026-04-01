@@ -1,9 +1,4 @@
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+import { slugify } from "@/lib/utils";
 
 export default function TableOfContents({
   sections,
@@ -31,5 +26,3 @@ export default function TableOfContents({
     </nav>
   );
 }
-
-export { slugify };

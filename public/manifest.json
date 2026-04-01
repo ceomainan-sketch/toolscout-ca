@@ -1,0 +1,21 @@
+{
+  "name": "ToolScout",
+  "short_name": "ToolScout",
+  "description": "Find the best AI & SaaS tools with honest, side-by-side comparisons.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
