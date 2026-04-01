@@ -364,6 +364,28 @@ export default async function ComparePage({
           </div>
         );
       })()}
+
+      {/* Featured Deal Banner */}
+      <div className="mt-12 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white rounded-xl p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded">Top Pick</span>
+          <span className="text-xs text-gray-400 italic">Sponsored</span>
+        </div>
+        <div className="md:flex items-center justify-between gap-6">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">🌐 Looking for web hosting? Bluehost from $2.95/mo</h3>
+            <p className="text-sm text-gray-600 mt-1">Free domain, free SSL, recommended by WordPress.org. Trusted by millions of websites worldwide.</p>
+          </div>
+          <a
+            href="https://bluehost.sjv.io/c/7111837/1376228/11352"
+            target="_blank"
+            rel="nofollow noopener"
+            className="inline-block mt-4 md:mt-0 bg-green-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors text-sm whitespace-nowrap"
+          >
+            Get Bluehost Deal &rarr;
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

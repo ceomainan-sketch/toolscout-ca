@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getAllComparisons, getAllBestLists, getAllCategories, getAllGuides, getAllAlternatives, getTool } from "@/lib/data";
 import ToolCard from "@/components/ToolCard";
 import StarRating from "@/components/StarRating";
+import FeaturedDeals from "@/components/FeaturedDeals";
 import { tools } from "@/data/tools";
 import { safeJsonLd, cleanDisplayTitle } from "@/lib/utils";
 
@@ -118,6 +119,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Featured Deals - Highest revenue affiliate links */}
+      <FeaturedDeals />
 
       {/* Browse by Category - Full Visual Grid */}
       <section id="categories" className="max-w-6xl mx-auto px-4 py-16 scroll-mt-20">
